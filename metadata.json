@@ -1,0 +1,5 @@
+{
+  "name": "Ollama Coder's Interface",
+  "description": "A web application UI to interact with a locally running Ollama instance for coding assistance. It features model selection, a chat interface with syntax highlighting, markdown support, and system prompt configuration.",
+  "requestFramePermissions": []
+}
