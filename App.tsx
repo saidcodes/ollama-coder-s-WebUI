@@ -23,19 +23,14 @@ const App: React.FC = () => {
 
 
   return (
-    <div className="flex h-screen antialiased text-neutral-300 bg-neutral-900">
+    <div className="flex h-screen  antialiased text-neutral-300 bg-neutral-850">
       <Sidebar  />
-      <div className="flex-1 flex flex-col overflow-hidden">
+       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-neutral-850 p-4 border-b border-neutral-700 flex justify-between items-center">
-      
-          <div className="flex items-center space-x-3">
-            {/* Placeholder for potential future elements */}
-          </div>
-        </header>
+       
         
         {/* Main Content Area */}
-        <main className="flex-1 flex flex-col p-2 md:p-6 overflow-y-auto bg-neutral-900 space-y-4">
+        <main className="flex-1 flex flex-col p-2 md:p-6 overflow-y-auto bg-neutral-800 space-y-4">
           {isOllamaLikelyDown && (
              <div className="flex flex-col items-center justify-center h-full text-center p-4 md:p-8">
                 <ExclamationTriangleIcon className="w-16 h-16 text-yellow-500 mb-4" />

@@ -1,13 +1,13 @@
-
 import React, { useContext, useState, useRef, useEffect } from 'react';
 import { OllamaContext } from '../contexts/OllamaContext';
 import { ChevronDownIcon, CodeBracketIcon } from '../constants';
 
 interface ModelSelectorProps {
-  collapsed?: boolean;
+  collapsed: boolean;
+  forceClose?: boolean;
 }
 
-const ModelSelector: React.FC<ModelSelectorProps> = ({ collapsed = false }) => {
+const ModelSelector: React.FC<ModelSelectorProps> = ({ collapsed, forceClose }) => {
   const context = useContext(OllamaContext);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -21,6 +21,13 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ collapsed = false }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Close dropdown when forceClose changes
+  useEffect(() => {
+    if (forceClose) {
+      setIsOpen(false);
+    }
+  }, [forceClose]);
 
   if (!context) return null;
   const { models, selectedModel, setSelectedModelByName, isLoading } = context;

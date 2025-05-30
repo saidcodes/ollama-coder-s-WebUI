@@ -15,7 +15,7 @@ interface ChatMessageProps {
 // 'node' is an AST node from HAST; 'any' is used for simplicity here if 'hast' types aren't directly available.
 // 'children' is typically React.ReactNode[] for custom component renderers.
 interface CustomCodeComponentProps {
-  node: any; // Ideally: import { Element } from 'hast'; then use 'Element' here.
+  node?: any; // Make node optional to match react-markdown's typing
   inline?: boolean;
   className?: string;
   children: React.ReactNode[]; // react-markdown passes children as an array to components

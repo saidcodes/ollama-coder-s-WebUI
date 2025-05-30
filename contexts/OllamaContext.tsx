@@ -1,8 +1,8 @@
-
 import React, { createContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { OllamaModel, OllamaTagResponse, Message, OllamaContextType, OllamaChatRequestBody, OllamaChatStreamChunk } from '../types';
+import { OllamaModel, Message, OllamaContextType, OllamaChatRequestBody } from '../types';
 import { OLLAMA_API_BASE_URL } from '../constants';
 import { fetchModels as apiFetchModels, streamChat as apiStreamChat } from '../services/ollamaService';
+import db, { Chat } from '../lib/db';
 
 export const OllamaContext = createContext<OllamaContextType | undefined>(undefined);
 
@@ -19,6 +19,9 @@ export const OllamaProvider: React.FC<OllamaProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [ollamaApiUrl, setOllamaApiUrlState] = useState<string>(OLLAMA_API_BASE_URL);
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [currentChatId, setCurrentChatId] = useState<number | undefined>();
+  
 
 
   const fetchModels = useCallback(async () => {
@@ -88,6 +91,7 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
     }
   };
 
+ 
   const clearChat = () => {
     setChatHistory([]);
     setCurrentAssistantMessage(null);
@@ -173,9 +177,97 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
   };
 
 
-  const stopGeneration = () => {
-    setIsLoading(false);
-    setCurrentAssistantMessage(null);
+
+
+  const saveChat = async () => {
+    if (!selectedModel || chatHistory.length === 0) return;
+
+    const chat: Chat = {
+      id: currentChatId,
+      title: chatHistory[0].content.slice(0, 30) + '...',
+      messages: chatHistory
+        .filter((msg): msg is Message & { role: 'user' | 'assistant' } => msg.role === 'user' || msg.role === 'assistant'),
+      modelId: selectedModel.name,
+      createdAt: (() => {
+        if (currentChatId) {
+          // Try to find the existing chat's createdAt date
+          const existingChat = chats.find(c => c.id === currentChatId);
+          return existingChat ? existingChat.createdAt : new Date();
+        }
+        return new Date();
+      })(),
+      lastUpdated: new Date()
+    };
+
+    try {
+      const id = await db.saveChat(chat);
+      setCurrentChatId(id);
+      // Refresh the chat list
+      const loadedChats = await db.getAllChats();
+      setChats(loadedChats);
+    } catch (error) {
+      console.error('Failed to save chat:', error);
+      setError('Failed to save chat to database');
+    }
+  };
+
+  // Modify the loadChats function to use the new database method
+  const loadChats = async () => {
+    try {
+      const loadedChats = await db.getAllChats();
+      setChats(loadedChats);
+    } catch (error) {
+      console.error('Failed to load chats:', error);
+      setError('Failed to load chats from database');
+    }
+  };
+
+  const loadChat = async (id: number) => {
+    try {
+      const chat = await db.getChat(id);
+      if (chat) {
+        setChatHistory(chat.messages);
+        setCurrentChatId(id);
+        if (chat.modelId) {
+          setSelectedModelByName(chat.modelId);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load chat:', error);
+      setError('Failed to load chat from database');
+    }
+  };
+
+  // Add debounced save effect
+  useEffect(() => {
+    const saveTimeout = setTimeout(() => {
+      if (chatHistory.length > 0) {
+        saveChat();
+      }
+    }, 1000); // Debounce saves to prevent too frequent database updates
+
+    return () => clearTimeout(saveTimeout);
+  }, [chatHistory]);
+
+  // Load chats on mount
+  useEffect(() => {
+    loadChats();
+  }, []);
+
+  // Modify the deleteChat function
+  const deleteChat = async (id: number) => {
+    try {
+      await db.deleteChat(id);
+      if (currentChatId === id) {
+        clearChat();
+        setCurrentChatId(undefined);
+      }
+      // Refresh the chat list
+      loadChats();
+    } catch (error) {
+      console.error('Failed to delete chat:', error);
+      setError('Failed to delete chat from database');
+    }
   };
 
   return (
@@ -194,6 +286,11 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
       fetchModels,
       ollamaApiUrl,
       setOllamaApiUrl,
+      chats,
+      loadChat,
+      loadChats,
+      deleteChat,
+      currentChatId
     }}>
       {children}
     </OllamaContext.Provider>

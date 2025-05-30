@@ -1,4 +1,3 @@
-
 export interface OllamaModel {
   name: string;
   model: string;
@@ -64,6 +63,12 @@ export interface OllamaContextType {
   ollamaApiUrl: string;
   setOllamaApiUrl: (url: string) => void; // Added for potential future settings
   stopGeneration: () => void;
+  //for storing the chat history
+  chats: Chat[];
+  loadChat: (id: number) => Promise<void>;
+  loadChats: () => Promise<void>;
+  deleteChat: (id: number) => Promise<void>;
+  currentChatId?: number;
 }
 
 export interface GroundingChunk {
@@ -72,5 +77,14 @@ export interface GroundingChunk {
     title: string;
   };
   // Add other grounding source types if needed
+}
+
+export interface Chat {
+  id?: number;
+  title: string;
+  messages: Message[];
+  modelId: string;
+  createdAt: Date;
+  lastUpdated: Date;
 }
 
