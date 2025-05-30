@@ -61,7 +61,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ language, value }) => {
 
   return (
     <div className="relative group my-2 bg-neutral-900 rounded-lg overflow-hidden shadow-md">
-      <div className="flex justify-between items-center px-3 py-1.5 bg-neutral-800 border-b border-neutral-700">
+      <div className="flex justify-between items-center px-3 py-1.5 bg-neutral-700 border-b border-neutral-700 ">
         <span className="text-xs text-neutral-400 font-mono">{displayLanguage}</span>
         <div className="flex items-center">
           {isHtml && (
@@ -87,7 +87,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ language, value }) => {
       <SyntaxHighlighter
         language={displayLanguage}
         style={vscDarkPlus}
-        customStyle={{ margin: 0, padding: '1rem', fontSize: '0.875rem', maxHeight: '500px', overflow: 'auto' }}
+        customStyle={{ margin: 0, padding: '1rem', fontSize: '0.875rem', maxHeight: '100%',  overflow: 'hidden' ,overflowX: 'auto' }}
         wrapLongLines={true}
         showLineNumbers={false} // Optional: can be true if desired
       >
