@@ -2,9 +2,21 @@ import React from 'react';
 
 export const OLLAMA_API_BASE_URL = 'http://localhost:11434';
 
+
 export const SparklesIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
-  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" {...props}>
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L1.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.25 12L17.437 9.154a4.5 4.5 0 01-3.09-3.09L12.5 3l.813 2.846a4.5 4.5 0 013.09 3.09L19.25 12l-2.846.813a4.5 4.5 0 01-3.09 3.09L12.5 19l.813-2.846a4.5 4.5 0 013.09-3.09L18.25 12z" />
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    fill="none" 
+    viewBox="0 0 24 24" 
+    strokeWidth={1.5} 
+    stroke="currentColor" 
+    {...props}
+  >
+    <path 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" 
+    />
   </svg>
 );
 
@@ -139,7 +151,13 @@ export const DEFAULT_SUGGESTIONS = [
   "Explain this JavaScript code: `const x = arr.reduce((acc, val) => acc + val, 0);`",
   "Generate a boilerplate HTML structure for a webpage with a header, sidebar, main content area, and footer.",
   "How do I debug a 'NullPointerException' in Java?",
-  "Convert this Python list comprehension to a regular for loop: `squares = [x**2 for x in range(10)]`"
+  "Convert this Python list comprehension to a regular for loop: `squares = [x**2 for x in range(10)]`",
+  "What is the difference between a for loop and a while loop?",
+  "Can you explain how a binary search works?",	
+  "How do I implement a binary search algorithm in Python?",
+  "What is the difference between a for loop and a while loop?",
+  "generate a div rotating in a circle with a random color every second with a random size",
+  
 ];
 
 export const ChevronDoubleLeftIcon: React.FC<React.SVGProps<SVGSVGElement>> = (props) => (
@@ -153,3 +171,4 @@ export const ChevronDoubleRightIcon: React.FC<React.SVGProps<SVGSVGElement>> = (
     <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 4.5l7.5 7.5-7.5 7.5m-6-15l7.5 7.5-7.5 7.5" />
   </svg>
 );
+
