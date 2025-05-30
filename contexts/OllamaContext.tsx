@@ -21,8 +21,26 @@ export const OllamaProvider: React.FC<OllamaProviderProps> = ({ children }) => {
   const [ollamaApiUrl, setOllamaApiUrlState] = useState<string>(OLLAMA_API_BASE_URL);
   const [chats, setChats] = useState<Chat[]>([]);
   const [currentChatId, setCurrentChatId] = useState<number | undefined>();
-  
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
 
+  const stopGeneration = useCallback(() => {
+    if (abortController) {
+      abortController.abort();
+      setAbortController(null);
+      setIsLoading(false);
+      // Don't clear the current message, let it stay where it was cut off
+      if (currentAssistantMessage) {
+        const assistantMessage: Message = {
+          id: Date.now().toString(),
+          role: 'assistant',
+          content: currentAssistantMessage,
+          timestamp: new Date(),
+        };
+        setChatHistory(prev => [...prev, assistantMessage]);
+        setCurrentAssistantMessage(null);
+      }
+    }
+  }, [abortController, currentAssistantMessage]);
 
   const fetchModels = useCallback(async () => {
     setIsLoading(true);
@@ -30,14 +48,14 @@ export const OllamaProvider: React.FC<OllamaProviderProps> = ({ children }) => {
     try {
       const fetchedModels = await apiFetchModels(ollamaApiUrl);
       setModels(fetchedModels);
-      if (fetchedModels.length > 0 && !selectedModel) {
-        const currentSelectedStillExists = selectedModel && fetchedModels.some(m => m.name === selectedModel.name);
-        if (currentSelectedStillExists) {
-            setSelectedModel(fetchedModels.find(m => m.name === selectedModel!.name) || fetchedModels[0]);
+      if (fetchedModels.length > 0) {
+        if (!selectedModel) {
+          setSelectedModel(fetchedModels.find(m => m.name === fetchedModels[2].name) || fetchedModels[0]);
         } else {
-            setSelectedModel(fetchedModels[0]);
+          const currentModel = fetchedModels.find(m => m.name === selectedModel.name);
+          setSelectedModel(currentModel || fetchedModels[0]);
         }
-      } else if (fetchedModels.length === 0) {
+      } else {
         setSelectedModel(null);
       }
     } catch (e) {
@@ -104,6 +122,13 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
       return;
     }
 
+    // Abort any existing generation
+    if (abortController) {
+      abortController.abort();
+    }
+
+    const newController = new AbortController();
+    setAbortController(newController);
     setIsLoading(true);
     setError(null);
     setCurrentAssistantMessage("");
@@ -134,7 +159,11 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
 
     try {
       let fullResponse = "";
+      const signal = newController.signal;
       for await (const chunk of apiStreamChat(ollamaApiUrl, requestBody)) {
+        if (signal.aborted) {
+          break;
+        }
         if (chunk.message && chunk.message.content) {
           fullResponse += chunk.message.content;
           setCurrentAssistantMessage(prev => (prev || "") + chunk.message.content);
@@ -147,15 +176,21 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
         }
       }
       
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: fullResponse,
-        timestamp: new Date(),
-      };
-      setChatHistory(prev => [...prev, assistantMessage]);
+      if (!signal.aborted) {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: fullResponse,
+          timestamp: new Date(),
+        };
+        setChatHistory(prev => [...prev, assistantMessage]);
+      }
 
     } catch (e) {
+      if ((e as any)?.name === 'AbortError') {
+        // Ignore abort errors
+        return;
+      }
       console.error("Error sending message:", e);
       const errorMessage = e instanceof Error ? e.message : String(e);
       setError(`Error communicating with Ollama: ${errorMessage}`);
@@ -167,6 +202,7 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
       };
       setChatHistory(prev => [...prev, errorAssistantMessage]);
     } finally {
+      setAbortController(null);
       setIsLoading(false);
       setCurrentAssistantMessage(null);
     }
@@ -270,6 +306,7 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
     }
   };
 
+  // Return value includes stopGeneration
   return (
     <OllamaContext.Provider value={{
       models,
@@ -290,7 +327,8 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
       loadChat,
       loadChats,
       deleteChat,
-      currentChatId
+      currentChatId,
+      stopGeneration
     }}>
       {children}
     </OllamaContext.Provider>
