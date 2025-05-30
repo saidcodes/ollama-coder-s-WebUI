@@ -11,7 +11,7 @@ export async function fetchModels(apiUrl: string): Promise<OllamaModel[]> {
   return data.models;
 }
 
-export async function* streamChat(apiUrl: string, body: OllamaChatRequestBody): AsyncGenerator<OllamaChatStreamChunk, void, undefined> {
+export async function* streamChat(apiUrl: string, body: OllamaChatRequestBody, signal?: AbortSignal): AsyncGenerator<OllamaChatStreamChunk, void, undefined> {
   const response = await fetch(`${apiUrl}/api/chat`, {
     method: 'POST',
     headers: {

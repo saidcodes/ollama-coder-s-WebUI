@@ -11,6 +11,7 @@ const ChatWindow: React.FC = () => {
   const [lastMessageLength, setLastMessageLength] = useState(0);
   const [userHasScrolled, setUserHasScrolled] = useState(false);
 
+
   const handleScroll = () => {
     if (!chatContainerRef.current || !context?.isLoading) return;
     
@@ -80,6 +81,8 @@ const ChatWindow: React.FC = () => {
   };
 
   const isChatEmpty = chatHistory.length === 0 && !currentAssistantMessage && !isLoading;
+  const randomSuggestions = DEFAULT_SUGGESTIONS.sort(() => 0.5 - Math.random()).slice(0, 4);
+  
 
   return (
     <div className="flex flex-col flex-1 h-full w-full bg-neutral-800 overflow-hidden">
@@ -105,13 +108,15 @@ const ChatWindow: React.FC = () => {
               <h2 className="text-2xl font-semibold text-neutral-100 mb-2">How can I help you today?</h2>
               <p className="text-neutral-400 mb-6">Select a model and start typing, or try one of these examples:</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
-                {DEFAULT_SUGGESTIONS.slice(0,4).map((suggestion, index) => (
+                
+                 {Array.from({ length: 4 }).map((_, i) => (
+                  
                   <button
-                    key={index}
-                    onClick={() => handleSuggestionClick(suggestion)}
+                    key={i}
+                    onClick={() => handleSuggestionClick(randomSuggestions[i])}
                     className="bg-neutral-700 hover:bg-neutral-600 p-4 rounded-xl text-sm text-neutral-300 text-left transition-colors"
                   >
-                    {suggestion}
+                    {randomSuggestions[i]}
                   </button>
                 ))}
               </div>
