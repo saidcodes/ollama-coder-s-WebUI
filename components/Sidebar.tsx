@@ -81,7 +81,7 @@ const Sidebar: React.FC = () => {
       </div>
       
       
-      <div className="flex overflow-y-auto">
+      <div className="flex overflow-auto">
         {isExpanded && chats.length > 0 && (
           <div className="space-y-1">
             <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider px-2">
@@ -90,15 +90,15 @@ const Sidebar: React.FC = () => {
             {chats.map((chat) => (
               <div
                 key={chat.id}
-                className={`flex items-center justify-between px-2 py-1.5 hover:bg-neutral-700 rounded-lg cursor-pointer ${
-                  currentChatId === chat.id ? 'bg-neutral-700' : ''
+                className={`flex items-center justify-between px-2 py-1.5 hover:bg-neutral-600 rounded-lg cursor-pointer max-w-[300px] ${
+                  currentChatId === chat.id ? 'bg-neutral-600' : ''
                 }`}
               >
                 <div
                   className="flex-1 truncate mr-2"
                   onClick={() => chat.id && loadChat(chat.id)}
                 >
-                  <span className="text-sm">{chat.title}</span>
+                  <span className="text-sm">{chat.title.slice(0, 24)}</span>
                 </div>
                 <button
                   onClick={(e) => {
