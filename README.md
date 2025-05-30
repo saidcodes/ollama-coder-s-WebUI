@@ -9,6 +9,8 @@ This contains everything you need to run your app locally.
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+2.make sure ollama is installed and downloaded at least a model
 3. Run the app:
    `npm run dev`
+4. enjoy your local ai chat webui
+
