@@ -37,7 +37,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ collapsed, forceClose }) 
   }
 
   if (!models || models.length === 0) {
-    return <div className="text-sm text-neutral-400 p-2 bg-neutral-800 rounded-md">No models available.</div>;
+    return <div className="text-sm text-neutral-400 p-2 bg-neutral-700 rounded-md">No models available.</div>;
   }
 
   const handleSelectModel = (modelName: string) => {
@@ -71,7 +71,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ collapsed, forceClose }) 
         </button>
       )}
       {isOpen && (
-        <div className={`absolute z-10 mt-1 ${collapsed ? 'left-12' : 'w-full'} bg-[#1e1e1e] border border-neutral-600 rounded-md shadow-lg max-h-60 overflow-y-auto styled-scrollbar`}>
+        <div className={`absolute z-10 mt-1 ${collapsed ? 'left-12' : 'w-full'} bg-neutral-800 border border-neutral-600 rounded-md shadow-lg max-h-60 overflow-y-auto styled-scrollbar`}>
           {models.map((model) => (
             <div
               key={model.name}
