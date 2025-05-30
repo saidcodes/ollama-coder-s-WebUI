@@ -1,8 +1,10 @@
 import React, { useContext, useState } from 'react';
 import { OllamaContext } from '../contexts/OllamaContext';
 import ModelSelector from './ModelSelector';
-import { PlusCircleIcon, TrashIcon, CogIcon, SparklesIcon, ChatBubbleLeftRightIcon, AdjustmentsHorizontalIcon, ChevronDoubleRightIcon, ChevronDoubleLeftIcon } from '../constants';
+import { PlusCircleIcon, TrashIcon, SparklesIcon,  AdjustmentsHorizontalIcon, ChevronDoubleRightIcon, ChevronDoubleLeftIcon } from '../constants';
 import SystemPromptInput from './SystemPromptInput';
+import '../styles/globals.css';
+
 
 
 const Sidebar: React.FC = () => {
@@ -78,19 +80,22 @@ const Sidebar: React.FC = () => {
           collapsed={!isExpanded} 
           forceClose={forceCloseDropdown}
         />
+       
+
       </div>
       
       
-      <div className="flex overflow-auto">
+      
+      <div className="flex overflow-y-auto chat-history  ">
         {isExpanded && chats.length > 0 && (
-          <div className="space-y-1">
-            <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider px-2">
+          <div className="w-full  ">
+            <h2 className=" mb-2 text-xs font-semibold text-neutral-400 uppercase tracking-wider px-2">
               Chat History
             </h2>
             {chats.map((chat) => (
               <div
                 key={chat.id}
-                className={`flex items-center justify-between px-2 py-1.5 hover:bg-neutral-600 rounded-lg cursor-pointer max-w-[300px] ${
+                className={` w-full flex items-center justify-between px-2 py-1.5 hover:bg-neutral-600 rounded-lg cursor-pointer transition-colors ${
                   currentChatId === chat.id ? 'bg-neutral-600' : ''
                 }`}
               >
@@ -98,7 +103,7 @@ const Sidebar: React.FC = () => {
                   className="flex-1 truncate mr-2"
                   onClick={() => chat.id && loadChat(chat.id)}
                 >
-                  <span className="text-sm">{chat.title.slice(0, 24)}</span>
+                  <span className="text-sm py-0.5">{chat.title}</span>
                 </div>
                 <button
                   onClick={(e) => {
