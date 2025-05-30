@@ -28,7 +28,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
   const isUser = role === 'user';
 
   const Icon = isUser ? UserCircleIcon : SparklesIcon;
-  const bgColor = isUser ? 'bg-neutral-750' : 'bg-neutral-800'; // Slightly different bg for user/AI
+  const bgColor = isUser ? 'bg-neutral-700' : 'bg-transparent'; // Slightly different bg for user/AI
   const textColor = 'text-neutral-100'; // Consistent text color
 
   return (
