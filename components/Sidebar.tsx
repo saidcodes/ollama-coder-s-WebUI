@@ -10,28 +10,43 @@ const Sidebar: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
+  const [forceCloseDropdown, setForceCloseDropdown] = useState(false);
 
   if (!context) return null;
 
-  const { clearChat, isLoading } = context;
+  const { clearChat, isLoading, chats, currentChatId, loadChat, deleteChat } = context;
 
   // Determine if sidebar should be expanded
   const isExpanded = !collapsed || isHovered;
 
+  // Update collapse handler
+  const handleCollapse = () => {
+    setCollapsed(!collapsed);
+    if (!collapsed) {
+      setForceCloseDropdown(true);
+      // Reset the force close after a short delay
+      setTimeout(() => setForceCloseDropdown(false), 100);
+    }
+  };
+
   return (
     <div 
-      className={`${isExpanded ? 'w-64' : 'w-16'} bg-neutral-800 p-4 space-y-6 border-r border-neutral-700 flex flex-col transition-all duration-300`}
+      className={`${isExpanded ? 'w-64' : 'w-16'} bg-neutral-700 p-4 space-y-6 border-r border-neutral-700 flex flex-col transition-all duration-300`}
       onMouseEnter={(e) => {
         // Only set hover if the target is not the collapse button or its children
         if (!(e.target as HTMLElement).closest('button[aria-label*="sidebar"]')) {
           collapsed && setIsHovered(true);
         }
       }}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setForceCloseDropdown(true);
+        setTimeout(() => setForceCloseDropdown(false), 100);
+      }}
     >
       <div className="flex items-center justify-between mb-4">
         <button
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={handleCollapse}
           className="p-2 rounded-md hover:bg-neutral-700 transition-colors"
           aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
         >
@@ -59,9 +74,47 @@ const Sidebar: React.FC = () => {
         {isExpanded && (
           <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">Models</h2>
         )}
-        <ModelSelector collapsed={!isExpanded} />
+        <ModelSelector 
+          collapsed={!isExpanded} 
+          forceClose={forceCloseDropdown}
+        />
       </div>
-      <div className="space-y-4">
+      
+      
+      <div className="flex overflow-y-auto">
+        {isExpanded && chats.length > 0 && (
+          <div className="space-y-1">
+            <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider px-2">
+              Chat History
+            </h2>
+            {chats.map((chat) => (
+              <div
+                key={chat.id}
+                className={`flex items-center justify-between px-2 py-1.5 hover:bg-neutral-700 rounded-lg cursor-pointer ${
+                  currentChatId === chat.id ? 'bg-neutral-700' : ''
+                }`}
+              >
+                <div
+                  className="flex-1 truncate mr-2"
+                  onClick={() => chat.id && loadChat(chat.id)}
+                >
+                  <span className="text-sm">{chat.title}</span>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    chat.id && deleteChat(chat.id);
+                  }}
+                  className="p-1 hover:bg-neutral-600 rounded"
+                >
+                  <TrashIcon className="w-4 h-4 text-neutral-400" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      <div className="">
         {isExpanded && (
           <>
             <button
@@ -83,7 +136,6 @@ const Sidebar: React.FC = () => {
           </button>
         )}
       </div>
-      
       {/* Footer actions - example */}
       {/* <div className="mt-auto space-y-2 border-t border-neutral-700 pt-4">
         <button className="w-full flex items-center space-x-2 text-neutral-300 hover:bg-neutral-700 p-2 rounded-md transition-colors">
