@@ -4,7 +4,7 @@ import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
 
 import { OllamaContext } from './contexts/OllamaContext';
-import { SparklesIcon, ExclamationTriangleIcon } from './constants';
+import {  ExclamationTriangleIcon } from './constants';
 
 const App: React.FC = () => {
   const ollamaContext = useContext(OllamaContext);
