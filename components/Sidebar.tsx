@@ -1,9 +1,10 @@
 import React, { useContext, useState } from 'react';
 import { OllamaContext } from '../contexts/OllamaContext';
 import ModelSelector from './ModelSelector';
-import { PlusCircleIcon, TrashIcon, SparklesIcon,  AdjustmentsHorizontalIcon, ChevronDoubleRightIcon, ChevronDoubleLeftIcon } from '../constants';
+import { PlusCircleIcon, SparklesIcon,  AdjustmentsHorizontalIcon, ChevronDoubleRightIcon, ChevronDoubleLeftIcon } from '../constants';
 import SystemPromptInput from './SystemPromptInput';
-import '../styles/globals.css';
+import ChatHistory from './ChatHistory';
+
 
 
 
@@ -33,7 +34,7 @@ const Sidebar: React.FC = () => {
 
   return (
     <div 
-      className={`${isExpanded ? 'w-64' : 'w-16'} bg-neutral-700 p-4 space-y-6 border-r border-neutral-700 flex flex-col transition-all duration-300`}
+      className={`${isExpanded ? 'w-64' : 'w-16'} hidden sm:flex bg-neutral-700 p-4 space-y-6 border-r border-neutral-700  flex-col transition-all duration-300`}
       onMouseEnter={(e) => {
         // Only set hover if the target is not the collapse button or its children
         if (!(e.target as HTMLElement).closest('button[aria-label*="sidebar"]')) {
@@ -86,39 +87,7 @@ const Sidebar: React.FC = () => {
       
       
       
-      <div className="flex overflow-y-auto chat-history  ">
-        {isExpanded && chats.length > 0 && (
-          <div className="w-full  ">
-            <h2 className=" mb-2 text-xs font-semibold text-neutral-400 uppercase tracking-wider px-2">
-              Chat History
-            </h2>
-            {chats.map((chat) => (
-              <div
-                key={chat.id}
-                className={` w-full flex items-center justify-between px-2 py-1.5 hover:bg-neutral-600 rounded-lg cursor-pointer transition-colors ${
-                  currentChatId === chat.id ? 'bg-neutral-600' : ''
-                }`}
-              >
-                <div
-                  className="flex-1 truncate mr-2"
-                  onClick={() => chat.id && loadChat(chat.id)}
-                >
-                  <span className="text-sm py-0.5">{chat.title}</span>
-                </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    chat.id && deleteChat(chat.id);
-                  }}
-                  className="p-1 hover:bg-neutral-600 rounded"
-                >
-                  <TrashIcon className="w-4 h-4 text-neutral-400" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <ChatHistory {...{ isExpanded, chats, currentChatId, loadChat, deleteChat }}  />
       <div className="">
         {isExpanded && (
           <>
