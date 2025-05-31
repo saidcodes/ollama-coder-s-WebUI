@@ -113,6 +113,7 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
   const clearChat = () => {
     setChatHistory([]);
     setCurrentAssistantMessage(null);
+    setCurrentChatId(null);
     setError(null); 
   };
 
@@ -214,7 +215,7 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
 
 
 
-
+//this 
   const saveChat = async () => {
     if (!selectedModel || chatHistory.length === 0) return;
 
