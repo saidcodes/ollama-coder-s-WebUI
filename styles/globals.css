@@ -1,22 +1,37 @@
+
+html, body, #root {
+      height: 100vh;
+      margin: 0;
+      padding: 0;
+      overflow: hidden; /* Prevent double scrollbars */
+    }
+/* caht history  */
+
 .chat-history {
   max-height: 40vh;
 }
 
-.chat-history::-webkit-scrollbar {
+/* For Chrome, Edge, and Safari */
+
+.chat-history::-webkit-scrollbar,
+::-webkit-scrollbar {
   width: 8px;
 }
 
-.chat-history::-webkit-scrollbar-track {
+.chat-history::-webkit-scrollbar-track,
+ ::-webkit-scrollbar-track {
   background: #404040;
   border-radius: 4px;
 }
 
-.chat-history::-webkit-scrollbar-thumb {
+.chat-history::-webkit-scrollbar-thumb,
+ ::-webkit-scrollbar-thumb {
   background: #525252;
   border-radius: 4px;
 }
 
-.chat-history::-webkit-scrollbar-thumb:hover {
+.chat-history::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:hover {
   background: #666666;
 }
 
@@ -25,3 +40,6 @@
   scrollbar-width: thin;
   scrollbar-color: #525252 #404040;
 }
+
+
+   
