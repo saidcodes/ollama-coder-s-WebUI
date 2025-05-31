@@ -4,6 +4,7 @@ import ChatMessage from './ChatMessage';
 import { PaperAirplaneIcon, SparklesIcon, StopIcon, DEFAULT_SUGGESTIONS } from '../constants';
 import Spinner from './Spinner';
 
+
 const ChatWindow: React.FC = () => {
   const context = useContext(OllamaContext);
   const [userInput, setUserInput] = useState('');
@@ -89,6 +90,7 @@ const ChatWindow: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between px-4  ">
         <div className="flex items-center space-x-2">
+          
           <SparklesIcon className="w-5 h-5 text-purple-400" />
           <span className="text-neutral-200 font-semibold">{selectedModel?.name || 'Select Model'}</span>
         </div>
@@ -104,7 +106,10 @@ const ChatWindow: React.FC = () => {
         <div className="max-w-3xl mx-auto p-4 space-y-6">
           {isChatEmpty && (
             <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] text-center">
-              <SparklesIcon className="w-16 h-16 text-purple-400 mb-4" />
+              
+          
+            <SparklesIcon className={ ` w-16 h-16 text-purple-400 mb-4`}
+ /> 
               <h2 className="text-2xl font-semibold text-neutral-100 mb-2">How can I help you today?</h2>
               <p className="text-neutral-400 mb-6">Select a model and start typing, or try one of these examples:</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
