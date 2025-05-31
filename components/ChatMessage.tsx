@@ -3,7 +3,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Message } from "../types";
 import CodeBlock from "./CodeBlock";
-import { UserCircleIcon, SparklesIcon } from "../constants"; // Using Sparkles for AI
+import { UserCircleIcon, SparklesIcon, SoundIcon } from "../constants"; // Using Sparkles for AI
+/* import { TTSService } from "../services/tts"; */
 
 interface ChatMessageProps {
   message: Message;
@@ -24,8 +25,16 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
   const isUser = role === "user";
 
   const Icon = isUser ? UserCircleIcon : SparklesIcon;
-  const bgColor = isUser ? "bg-neutral-700" : "bg-transparent"; // Slightly different bg for user/AI
+  const bgColor = isUser ? "bg-neutral-700" : "bg-transparent"; //no bg for the ai
   const textColor = "text-neutral-100"; // Consistent text color
+
+  // function to handle the tts service
+  const handleSpeak = async () => {
+    alert("coming soon feature have not been implemented yet");
+    /*  if (!isStreaming && !isUser) {
+      await TTSService.speak(content);
+    } */
+  };
 
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-3`}>
@@ -41,6 +50,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
               : "mr-2 bg-purple-500 text-white"
           }`}
         />
+
         {/* Apply prose styles to this wrapper div, not directly to ReactMarkdown */}
         <div
           className={`px-4 py-3 rounded-xl ${bgColor} ${textColor} prose prose-invert 
@@ -121,6 +131,16 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
           >
             {content + (isStreaming ? "▍" : "")}
           </ReactMarkdown>
+          {!isUser && !isStreaming && (
+            <button
+              //this for futur update adding the tts
+              onClick={handleSpeak}
+              className="flex-shrink-0 p-1.5 hover:bg-neutral-700 rounded-lg transition-colors"
+              title="Listen to response"
+            >
+              <SoundIcon className="w-5 h-5 text-neutral-300" />
+            </button>
+          )}
         </div>
       </div>
     </div>
