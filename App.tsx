@@ -5,6 +5,7 @@ import ChatWindow from './components/ChatWindow';
 
 import { OllamaContext } from './contexts/OllamaContext';
 import {  ExclamationTriangleIcon } from './constants';
+import { TTSProvider } from './contexts/TTSContext';
 
 const App: React.FC = () => {
   const ollamaContext = useContext(OllamaContext);
@@ -23,6 +24,7 @@ const App: React.FC = () => {
 
 
   return (
+    <TTSProvider>
     <div className="flex h-screen  antialiased text-neutral-300 bg-neutral-850">
       <Sidebar  />
        <div className="flex-1 flex flex-col overflow-hidden">
@@ -63,7 +65,7 @@ const App: React.FC = () => {
         </main>
       </div>
     </div>
-  );
+  </TTSProvider>);
 };
 
 export default App;
