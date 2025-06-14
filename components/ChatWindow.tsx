@@ -4,69 +4,57 @@ import ChatMessage from './ChatMessage';
 import { PaperAirplaneIcon, SparklesIcon, StopIcon, DEFAULT_SUGGESTIONS } from '../constants';
 import Spinner from './Spinner';
 
-
 const ChatWindow: React.FC = () => {
   const context = useContext(OllamaContext);
   const [userInput, setUserInput] = useState('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
-  const [lastMessageLength, setLastMessageLength] = useState(0);
-  const [userHasScrolled, setUserHasScrolled] = useState(false);
+  const [isNearBottom, setIsNearBottom] = useState(true);
+  const [suggestions, setSuggestions] = useState<string[]>([]);
+  
+  if (!context) return null;
+  
+  const {
+    chatHistory,
+    sendMessage,
+    isLoading,
+    currentAssistantMessage,
+    selectedModel,
+    error,
+    stopGeneration
+  } = context;
+  
+  useEffect(() => {
+    if (chatHistory.length === 0 && !currentAssistantMessage && !isLoading) {
+      setSuggestions(DEFAULT_SUGGESTIONS.sort(() => 0.5 - Math.random()).slice(0, 4));
+    }
+  }, [chatHistory, currentAssistantMessage, isLoading]);
 
-
+  // Scroll handling
   const handleScroll = () => {
-    if (!chatContainerRef.current || !context?.isLoading) return;
+    if (!chatContainerRef.current) return;
     
     const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
-    const isAtBottom = scrollHeight - scrollTop - clientHeight < 10;
-    
-    // Only set userHasScrolled to true if we're not at the bottom
-    if (!isAtBottom) {
-      setUserHasScrolled(true);
-    }
+    setIsNearBottom(scrollHeight - scrollTop - clientHeight < 10);
   };
 
+// Effect to scroll to the bottom of the chat window when new messages arrive or when near the bottom
   useEffect(() => {
-    if (!chatContainerRef.current || !context) return;
-    
-    const { currentAssistantMessage, isLoading } = context;
-    
-    // Reset userHasScrolled when a new message starts
-    if (currentAssistantMessage?.length === 1) {
-      setUserHasScrolled(false);
-    }
-    
-    // Scroll to bottom if:
-    // 1. New message starts (length === 1)
-    // 2. Message completes (isLoading becomes false)
-    // 3. Message added to history
-    // 4. During streaming IF user hasn't scrolled away
-    if (
-      (currentAssistantMessage?.length === 1) || // New message starts
-      (!isLoading && currentAssistantMessage) || // Message completed
-      (!currentAssistantMessage && lastMessageLength > 0) || // Message added to history
-      (isLoading && !userHasScrolled) // During streaming, but only if user hasn't scrolled
-    ) {
+    if (!chatContainerRef.current) return;
+
+    const shouldScrollToBottom =
+      isNearBottom || // Scroll if near bottom
+      currentAssistantMessage?.length === 1; // Scroll on new message
+
+    if (shouldScrollToBottom) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-    
-    setLastMessageLength(currentAssistantMessage?.length ?? 0);
-  }, [context?.chatHistory, context?.currentAssistantMessage, context?.isLoading, userHasScrolled]);
+  }, [chatHistory, currentAssistantMessage, isLoading, isNearBottom]);
 
-  if (!context) return null;
-  const { chatHistory, sendMessage, isLoading, currentAssistantMessage, selectedModel, error, stopGeneration } = context;
-
+  // Message handling
   const handleSend = () => {
     if (userInput.trim() && selectedModel) {
       sendMessage(userInput);
       setUserInput('');
-    }
-  };
-
-  const handleButtonClick = () => {
-    if (isLoading) {
-      stopGeneration();
-    } else {
-      handleSend();
     }
   };
 
@@ -76,25 +64,20 @@ const ChatWindow: React.FC = () => {
       handleSend();
     }
   };
-  
-  const handleSuggestionClick = (suggestion: string) => {
-    setUserInput(suggestion);
-  };
 
+  // UI State
   const isChatEmpty = chatHistory.length === 0 && !currentAssistantMessage && !isLoading;
-  const randomSuggestions = DEFAULT_SUGGESTIONS.sort(() => 0.5 - Math.random()).slice(0, 4);
-  
 
   return (
     <div className="flex flex-col flex-1 h-full w-full bg-neutral-800 overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4  ">
+      <div className="flex items-center px-4">
         <div className="flex items-center space-x-2">
-          
           <SparklesIcon className="w-5 h-5 text-purple-400" />
-          <span className="text-neutral-200 font-semibold">{selectedModel?.name || 'Select Model'}</span>
+          <span className="text-neutral-200 font-semibold">
+            {selectedModel?.name || 'Select Model'}
+          </span>
         </div>
-      
       </div>
 
       {/* Chat Container */}
@@ -118,10 +101,10 @@ const ChatWindow: React.FC = () => {
                   
                   <button
                     key={i}
-                    onClick={() => handleSuggestionClick(randomSuggestions[i])}
+                    onClick={() => setUserInput(suggestions[i])}
                     className="bg-neutral-700 hover:bg-neutral-600 p-4 rounded-xl text-sm text-neutral-300 text-left transition-colors"
                   >
-                    {randomSuggestions[i]}
+                    {suggestions[i]}
                   </button>
                 ))}
               </div>
@@ -185,7 +168,13 @@ const ChatWindow: React.FC = () => {
               disabled={!selectedModel || isLoading}
             />
             <button
-              onClick={handleButtonClick}
+              onClick={() => {
+                if (isLoading) {
+                  stopGeneration();
+                } else {
+                  handleSend();
+                }
+              }}
               disabled={(!userInput.trim() && !isLoading) || !selectedModel}
               className={`${
                 isLoading 
