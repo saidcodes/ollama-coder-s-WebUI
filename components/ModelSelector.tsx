@@ -81,7 +81,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ collapsed, forceClose }) 
             >
               <div className="flex items-center">
                 <CodeBracketIcon className="w-4 h-4 mr-2 text-neutral-400 group-hover:text-neutral-100"/>
-                <span className="truncate">{model.name}</span>
+                <span className="truncate">{model.name.includes('/') ? model.name.split('/')[1].split('-')[1]+'  unc' : model.name}</span>
               </div>
               <span className="text-xs text-neutral-400 group-hover:text-neutral-300">{formatModelSize(model.size)}</span>
             </div>
