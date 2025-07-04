@@ -1,3 +1,4 @@
+import React, { useMemo } from 'react';
 
 import { TrashIcon } from '../constants';
 import { Chat } from '../lib/db';
@@ -41,21 +42,22 @@ function ChatHistory({
 }: {
   isExpanded: boolean;
   chats: Chat[];
-  currentChatId: number;
+  currentChatId: number | undefined;
   loadChat: (id: number) => void;
   deleteChat: (id: number) => void;
 }) {
-  const sortedChats = [...chats].sort((a, b) => 
-    b.lastUpdated.getTime() - a.lastUpdated.getTime()
+  const sortedChats = React.useMemo(() =>
+    [...chats].sort((a, b) => b.lastUpdated.getTime() - a.lastUpdated.getTime()),
+    [chats]
   );
   
-  const groupedChats = groupChatsByDate(sortedChats);
+  const groupedChats = useMemo(() => groupChatsByDate(sortedChats), [sortedChats]);
 
   return (
     <div className="flex overflow-y-auto chat-history">
       {isExpanded && chats.length > 0 && (
         <div className="w-full">
-          <h2 className="mb-2 text-xs font-semibold text-neutral-400 uppercase tracking-wider px-2">
+          <h2 className="mb-2 text-xs font-semibold text-neutral-400 uppercase tracking-wider px-2 pb-1 bg-neutral-850">
             Chat History
           </h2>
           {Object.entries(groupedChats).map(([group, groupChats]) => (
