@@ -9,11 +9,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@gradio/client": "^1.15.1",
     "@tailwindcss/vite": "^4.1.8",
     "@types/audio-play": "^2.3.2",
     "dexie": "^4.0.11",
     "dexie-react-hooks": "^1.1.7",
     "dotenv": "^16.5.0",
+    "lodash": "^4.17.21",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
@@ -23,6 +25,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
+    "@types/react-dom": "^19.1.6",
     "@types/react-syntax-highlighter": "^15.5.13",
     "tailwind-scrollbar": "^4.0.2",
     "typescript": "~5.7.2",
