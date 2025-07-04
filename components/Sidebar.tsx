@@ -5,11 +5,11 @@ import { PlusCircleIcon, SparklesIcon,  AdjustmentsHorizontalIcon, ChevronDouble
 import SystemPromptInput from './SystemPromptInput';
 import ChatHistory from './ChatHistory';
 
-
-
+import VoiceSelector from './VoiceSelector';
 
 const Sidebar: React.FC = () => {
   const context = useContext(OllamaContext);
+
   const [collapsed, setCollapsed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [showSystemPrompt, setShowSystemPrompt] = useState(false);
@@ -18,6 +18,8 @@ const Sidebar: React.FC = () => {
   if (!context) return null;
 
   const { clearChat, isLoading, chats, currentChatId, loadChat, deleteChat } = context;
+
+
 
   // Determine if sidebar should be expanded
   const isExpanded = !collapsed || isHovered;
@@ -31,6 +33,7 @@ const Sidebar: React.FC = () => {
       setTimeout(() => setForceCloseDropdown(false), 100);
     }
   };
+
 
   return (
     <div 
@@ -53,10 +56,10 @@ const Sidebar: React.FC = () => {
           className="p-2 rounded-md hover:bg-neutral-700 transition-colors"
           aria-label={isExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
         >
-         {collapsed ? <ChevronDoubleRightIcon className="w-5 h-5 text-neutral-300" /> : <ChevronDoubleLeftIcon className="w-5 h-5 text-neutral-300" />} 
+         {collapsed ? <ChevronDoubleRightIcon className="w-5 h-5 text-neutral-300 cursor-pointer" /> : <ChevronDoubleLeftIcon className="w-5 h-5 text-neutral-300 cursor-e-resize" />} 
         </button>
         {isExpanded && (
-          <div className="flex items-center space-x-2">
+          <div className=" flex items-center space-x-2">
             <SparklesIcon className="w-5 h-5 text-purple-400" />
             <h1 className="text-lg font-semibold text-neutral-100">Ollama Coder</h1>
           </div>
@@ -88,6 +91,7 @@ const Sidebar: React.FC = () => {
       
       
       <ChatHistory {...{ isExpanded, chats, currentChatId, loadChat, deleteChat }}  />
+      
       <div className="">
         {isExpanded && (
           <>
@@ -110,6 +114,9 @@ const Sidebar: React.FC = () => {
           </button>
         )}
       </div>
+      
+      <VoiceSelector isExpanded={isExpanded}  />
+      
       {/* Footer actions - example */}
       {/* <div className="mt-auto space-y-2 border-t border-neutral-700 pt-4">
         <button className="w-full flex items-center space-x-2 text-neutral-300 hover:bg-neutral-700 p-2 rounded-md transition-colors">
