@@ -19,6 +19,7 @@ export const OllamaProvider: React.FC<OllamaProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [ollamaApiUrl, setOllamaApiUrlState] = useState<string>(OLLAMA_API_BASE_URL);
+  const [isOllamaAvailable, setIsOllamaAvailable] = useState<boolean>(true); // Assume available initially
   const [chats, setChats] = useState<Chat[]>([]);
   const [currentChatId, setCurrentChatId] = useState<number | undefined>();
   const [abortController, setAbortController] = useState<AbortController | null>(null);
@@ -45,12 +46,13 @@ export const OllamaProvider: React.FC<OllamaProviderProps> = ({ children }) => {
   const fetchModels = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setIsOllamaAvailable(true); // Assume available before fetching
     try {
       const fetchedModels = await apiFetchModels(ollamaApiUrl);
       setModels(fetchedModels);
       if (fetchedModels.length > 0) {
         if (!selectedModel) {
-          setSelectedModel(fetchedModels.find(m => m.name === fetchedModels[2].name) || fetchedModels[0]);
+          setSelectedModel(fetchedModels.find(m => m.name === fetchedModels.sort((a, b) => a.size - b.size)[0].name) || fetchedModels[0]);
         } else {
           const currentModel = fetchedModels.find(m => m.name === selectedModel.name);
           setSelectedModel(currentModel || fetchedModels[0]);
@@ -62,8 +64,10 @@ export const OllamaProvider: React.FC<OllamaProviderProps> = ({ children }) => {
       // Refined console logging
       if (e instanceof TypeError && e.message.toLowerCase().includes('failed to fetch')) {
         console.error(`Network error while trying to fetch models from ${ollamaApiUrl}: ${e.message}. This is often a CORS issue or Ollama server problem. Check the UI for detailed troubleshooting steps.`);
+        setIsOllamaAvailable(false); // Set to false if fetch fails
       } else {
         console.error(`Error fetching models from ${ollamaApiUrl}:`, e);
+        setIsOllamaAvailable(false); // Also set to false for other errors
       }
 
       let specificErrorDetails = "";
@@ -75,11 +79,7 @@ This usually means:
     *   **Action:** Ensure 'ollama serve' is running and there are no firewalls blocking access.
 
 2.  **CORS Policy Issue (Very Common):** Your browser is blocking the request due to security (CORS). This happens if the app (e.g., served from a development server like http://localhost:3000) and Ollama (typically http://localhost:11434) are on different origins.
-    *   **Action (Recommended for Ollama):** Configure Ollama to allow requests from this app's origin. Set the \`OLLAMA_ORIGINS\` environment variable when starting Ollama.
-        *   Example: If your app runs on port 3000, use: \`OLLAMA_ORIGINS=http://localhost:3000 ollama serve\`
-        *   To allow all origins (less secure, useful for local development only): \`OLLAMA_ORIGINS=* ollama serve\`
-        *   Refer to the official Ollama documentation for the most current instructions on setting \`OLLAMA_ORIGINS\`.
-    *   **Action (Alternative for Local Dev):** Use a browser extension that disables CORS (use with extreme caution and only for trusted local development environments).
+
 
 3.  **Incorrect API URL:** The URL \`${ollamaApiUrl}\` might be incorrect.
 
@@ -100,7 +100,7 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
   useEffect(() => {
     fetchModels();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ollamaApiUrl]); 
+  }, [ollamaApiUrl]);
 
   const setSelectedModelByName = (name: string) => {
     if(models){
@@ -113,7 +113,7 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
   const clearChat = () => {
     setChatHistory([]);
     setCurrentAssistantMessage(null);
-    setCurrentChatId(null);
+    setCurrentChatId(undefined);
     setError(null); 
   };
 
@@ -329,7 +329,8 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
       loadChats,
       deleteChat,
       currentChatId,
-      stopGeneration
+      stopGeneration,
+      
     }}>
       {children}
     </OllamaContext.Provider>
