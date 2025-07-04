@@ -3,10 +3,13 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Message } from "../types";
 import CodeBlock from "./CodeBlock";
-import { UserCircleIcon, SparklesIcon, SoundIcon } from "../constants"; // Using Sparkles for AI
-/* import { TTSService } from "../services/tts"; */
-
-interface ChatMessageProps {
+import { UserCircleIcon, SparklesIcon, SpeakerXMarkIcon, SpeakerWaveIcon, ClipboardIcon, CheckIcon } from "../constants"; // Using Sparkles for AI, Added Clipboard and Check Icons
+import { TTSService } from "../services/tts";
+import { useTTS } from "@/contexts/TTSContext";
+import useCopyToClipboard from '../hooks/useCopyToClipboard'; // Import the hook
+ 
+ 
+ interface ChatMessageProps {
   message: Message;
   isStreaming?: boolean;
 }
@@ -15,7 +18,7 @@ interface CustomCodeComponentProps {
   node?: any; // Make node optional to match react-markdown's typing
   inline?: boolean;
   className?: string;
-  children: React.ReactNode[]; // react-markdown passes children as an array to components
+  children?: React.ReactNode; // Make children optional
   style?: React.CSSProperties; // Optional style prop
   [key: string]: any; // To catch any other props passed by react-markdown
 }
@@ -23,17 +26,32 @@ interface CustomCodeComponentProps {
 const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
   const { role, content } = message;
   const isUser = role === "user";
-
-  const Icon = isUser ? UserCircleIcon : SparklesIcon;
+  const [isPlaying, setIsplaying] = React.useState(false);
+  const {selectedVoice}=useTTS()
+  const [isCopied, copyToClipboard] = useCopyToClipboard(); // Initialize copy hook
+ 
+  const handleCopy = async () => { // Add copy handler
+    await copyToClipboard(content);
+  };
+ 
+   const Icon = isUser ? UserCircleIcon : SparklesIcon;
   const bgColor = isUser ? "bg-neutral-700" : "bg-transparent"; //no bg for the ai
   const textColor = "text-neutral-100"; // Consistent text color
-
+  
   // function to handle the tts service
   const handleSpeak = async () => {
-    alert("coming soon feature have not been implemented yet");
-    /*  if (!isStreaming && !isUser) {
-      await TTSService.speak(content);
-    } */
+    try {
+      if (!isStreaming && !isUser) {
+        setIsplaying(true);
+        await TTSService.speak(content,selectedVoice);
+
+      }
+      setIsplaying(false);
+    } catch (error) {
+      setIsplaying(false)
+      alert("Text-to-speech service error. Please make sure the API is running.");
+    }
+    
   };
 
   return (
@@ -67,12 +85,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
   prose-pre:rounded-md 
   overflow-hidden`}
         >
-          <ReactMarkdown
-            remarkPlugins={[remarkGfm]}
-            components={{
-              code: (props: CustomCodeComponentProps) => {
-                // Explicitly type props
-                const { node, inline, className, children, ...rest } = props;
+          <div className="flex-shrink"> {/* Add a flex container for content and copy button */}
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                code: (props: CustomCodeComponentProps) => {
+                  // Explicitly type props
+                  const { node, inline, className, children, ...rest } = props;
 
                 // Convert children to string for CodeBlock's value prop.
                 // String(children) works because ReactNodeArray stringifies by concatenation.
@@ -131,17 +150,31 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
           >
             {content + (isStreaming ? "▍" : "")}
           </ReactMarkdown>
+          <button
+             onClick={handleCopy}
+             className="flex-shrink-0 p-1.5 hover:bg-neutral-700 rounded-lg transition-colors ml-2" // Add margin-left for spacing
+             aria-label={isCopied ? 'Copied!' : 'Copy message'}
+             title={isCopied ? 'Copied!' : 'Copy message'}
+           >
+             {isCopied ? <CheckIcon className="w-5 h-5 text-green-400" /> : <ClipboardIcon className="w-5 h-5 text-neutral-400" />}
+           </button>
           {!isUser && !isStreaming && (
             <button
-              //this for futur update adding the tts
+              aria-label="Listen to response"
               onClick={handleSpeak}
-              className="flex-shrink-0 p-1.5 hover:bg-neutral-700 rounded-lg transition-colors"
+              disabled={isStreaming}
+              className="flex-shrink-0 p-1.5 hover:bg-neutral-700 rounded-lg transition-colors ml-2" // Add margin-left for spacing
               title="Listen to response"
             >
-              <SoundIcon className="w-5 h-5 text-neutral-300" />
+                       {isPlaying ? (
+              <SpeakerWaveIcon className="w-5 h-5 text-green-500 animate-pulse" />
+            ) : (
+              <SpeakerXMarkIcon className="w-5 h-5 text-neutral-400" />
+            )}
             </button>
           )}
-        </div>
+        </div> {/* Closing tag for the flex container */}
+</div> {/* Closing tag for the prose styles div */}
       </div>
     </div>
   );
