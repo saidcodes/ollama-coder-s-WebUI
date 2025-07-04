@@ -1,4 +1,3 @@
-
 import React, { useContext } from 'react';
 import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
@@ -6,7 +5,6 @@ import ChatWindow from './components/ChatWindow';
 import { OllamaContext } from './contexts/OllamaContext';
 import {  ExclamationTriangleIcon } from './constants';
 import { TTSProvider } from './contexts/TTSContext';
-
 const App: React.FC = () => {
   const ollamaContext = useContext(OllamaContext);
 
@@ -29,7 +27,7 @@ const App: React.FC = () => {
       <Sidebar  />
        <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-       
+    
         
         {/* Main Content Area */}
         <main className="flex-1 flex flex-col p-2 md:p-6 overflow-y-auto bg-neutral-800 space-y-4">
