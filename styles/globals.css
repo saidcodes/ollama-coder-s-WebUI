@@ -1,4 +1,3 @@
-
 html, body, #root {
       height: 100vh;
       margin: 0;
@@ -41,5 +40,10 @@ html, body, #root {
   scrollbar-color: #525252 #404040;
 }
 
+/* syntax div */
+.syntax-highlight-wrapper > div {
+  margin: 0 !important;
+  background: transparent !important;
+}
 
-   
+
