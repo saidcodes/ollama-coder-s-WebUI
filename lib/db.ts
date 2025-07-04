@@ -2,7 +2,7 @@ import Dexie from 'dexie';
 
 export interface ChatMessage {
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: Date;
 }
@@ -14,7 +14,7 @@ export interface Chat {
   modelId: string;
   createdAt: Date;
   lastUpdated: Date;
-}
+} 
 
 class ChatDatabase extends Dexie {
   chats!: Dexie.Table<Chat, number>;
