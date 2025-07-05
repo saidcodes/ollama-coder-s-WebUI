@@ -12,7 +12,13 @@ const VoiceSelector: React.FC<VoiceSelectorProps> = ({
   isExpanded,
   currentText = "",
 }) => {
-  const { selectedVoice, setSelectedVoice, autoSelectVoice, isAutoDetect, setIsAutoDetect } = useTTS();
+  const {
+    selectedVoice,
+    setSelectedVoice,
+    autoSelectVoice,
+    isAutoDetect,
+    setIsAutoDetect,
+  } = useTTS();
   const [showVoiceSelector, setShowVoiceSelector] = React.useState(false);
 
   return (
