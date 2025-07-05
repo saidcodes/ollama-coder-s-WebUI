@@ -1,15 +1,29 @@
-# Run and deploy your AI Studio app
+# Ollama Coder's Interface
 
-This contains everything you need to run your app locally.
+A simple interface to run and interact with AI models locally using Ollama.
 
-## Run Locally
+## Prerequisites
 
-**Prerequisites:** Node.js
+- [Node.js](https://nodejs.org/)
+- [Ollama](https://ollama.com/) installed and at least one model downloaded
 
-1. Install dependencies:
-   `npm install`
-2. make sure ollama is installed and downloaded at least a model
+## Getting Started
 
-3. Run the app:
-   `npm run dev`
-4. enjoy your local ai chat webui
+1. **Install dependencies:**
+   ```
+   npm install
+   ```
+
+2. **Ensure Ollama is running** and you have downloaded at least one model.
+
+3. **Start the development server:**
+   ```
+   npm run dev
+   ```
+
+4. Open your browser and enjoy your local AI chat web UI!
+
+## Notes
+
+- For more information on Ollama, visit [Ollama Documentation](https://ollama.com/docs).
+- If you encounter issues, check that Ollama is running and accessible on its default port.
