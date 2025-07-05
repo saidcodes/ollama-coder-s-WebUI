@@ -1,4 +1,4 @@
-import React, { useContext, useState, useRef, useEffect} from "react";
+import React, { useContext, useState, useRef, useEffect } from "react";
 import { OllamaContext } from "../contexts/OllamaContext";
 import ChatMessage from "./ChatMessage";
 import {
@@ -7,22 +7,21 @@ import {
   StopIcon,
   DEFAULT_SUGGESTIONS,
 } from "../constants";
- import Spinner from "./Spinner";
-
-
+import Spinner from "./Spinner";
 
 const ChatWindow: React.FC = () => {
-  const context = useContext<React.ContextType<typeof OllamaContext>>(OllamaContext);
+  const context =
+    useContext<React.ContextType<typeof OllamaContext>>(OllamaContext);
   const [userInput, setUserInput] = useState<string>("");
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const [isNearBottom, setIsNearBottom] = useState<boolean>(true);
   const [suggestions, setSuggestions] = useState<string[]>([]);
- 
 
- 
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const randomSugugestion =DEFAULT_SUGGESTIONS.sort(() => 0.5 - Math.random()).slice(0, 4) ;
+  const randomSugugestion = DEFAULT_SUGGESTIONS.sort(
+    () => 0.5 - Math.random()
+  ).slice(0, 4);
 
   if (!context) return null;
 
@@ -71,31 +70,21 @@ const ChatWindow: React.FC = () => {
     console.log("focus");
   };
   useEffect(() => {
-  
-      handleFocus();
-  
-   
-  },[isLoading]);
+    handleFocus();
+  }, [isLoading]);
 
   // Message handling
   const handleSend = () => {
     if (userInput.trim() && selectedModel) {
       sendMessage(userInput);
       setUserInput("");
-     
-     
     }
-
-
-
   };
-  
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
-      
     }
   };
 
@@ -133,15 +122,14 @@ const ChatWindow: React.FC = () => {
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full max-w-2xl">
                 {suggestions.map((suggestion, i) => (
-                 
-                   <button
+                  <button
                     key={i}
                     value={suggestion}
                     onClick={() => setUserInput(suggestions[i])}
                     className="bg-neutral-700 hover:bg-neutral-600 p-4 rounded-xl text-sm text-neutral-300 text-left transition-colors"
                   >
-                   <p>{suggestions[i]}</ p>
-                  </button> 
+                    <p>{suggestions[i]}</p>
+                  </button>
                 ))}
               </div>
             </div>
@@ -192,17 +180,23 @@ const ChatWindow: React.FC = () => {
       {/* Input Area */}
       <div className="border-t border-neutral-700 bg-transparent">
         <div className="max-w-3xl mx-auto p-4">
-          <div className={`flex items-end space-x-2 bg-neutral-700 rounded-xl p-2 ${isLoading ? "opacity-50 transform scale-95 transition-ease-in-out duration-200" : ""}
-          ${inputRef.current?.value ? "ring-1 ring-blue-500 transition-ease-in-out duration-200" : ""}`}>
+          <div
+            className={`flex items-end space-x-2 bg-neutral-700 rounded-xl p-2 ${
+              isLoading
+                ? "opacity-50 transform scale-95 transition-ease-in-out duration-200"
+                : ""
+            }
+          ${
+            inputRef.current?.value
+              ? "ring-1 ring-blue-500 transition-ease-in-out duration-200"
+              : ""
+          }`}
+          >
             <textarea
               value={userInput}
               onChange={(e) => setUserInput(e.target.value)}
               onKeyDown={handleKeyPress}
               ref={inputRef}
-           
-              
-              
-            
               placeholder={
                 selectedModel
                   ? `Message ${selectedModel.name}...`

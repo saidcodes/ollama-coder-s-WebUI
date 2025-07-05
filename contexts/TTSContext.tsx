@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
-import { TTSVoice } from '../services/tts';
+import React, { createContext, useContext, useState } from "react";
+import { TTSVoice } from "../services/tts";
 
 interface TTSContextType {
   selectedVoice: TTSVoice;
@@ -11,17 +11,19 @@ interface TTSContextType {
 
 const TTSContext = createContext<TTSContextType | null>(null);
 
-export const TTSProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const TTSProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [selectedVoice, setSelectedVoice] = useState<TTSVoice>(TTSVoice.BELLA);
   const [isAutoDetect, setIsAutoDetect] = useState(false);
 
   const handleVoiceChange = (voice: string) => {
     // Ensure the voice is a valid TTSVoice enum value
     if (Object.values(TTSVoice).includes(voice as TTSVoice)) {
-      console.log('Voice changed to:', voice);
+      console.log("Voice changed to:", voice);
       setSelectedVoice(voice as TTSVoice);
     } else {
-      console.warn('Invalid voice value:', voice);
+      console.warn("Invalid voice value:", voice);
       setSelectedVoice(TTSVoice.BELLA);
     }
   };
@@ -46,13 +48,15 @@ export const TTSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   return (
-    <TTSContext.Provider value={{
-      selectedVoice,
-      setSelectedVoice: handleVoiceChange,
-      autoSelectVoice,
-      isAutoDetect,
-      setIsAutoDetect,
-    }}>
+    <TTSContext.Provider
+      value={{
+        selectedVoice,
+        setSelectedVoice: handleVoiceChange,
+        autoSelectVoice,
+        isAutoDetect,
+        setIsAutoDetect,
+      }}
+    >
       {children}
     </TTSContext.Provider>
   );
@@ -61,7 +65,7 @@ export const TTSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 export const useTTS = () => {
   const context = useContext(TTSContext);
   if (!context) {
-    throw new Error('useTTS must be used within a TTSProvider');
+    throw new Error("useTTS must be used within a TTSProvider");
   }
   return context;
 };
