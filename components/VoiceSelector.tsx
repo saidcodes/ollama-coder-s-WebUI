@@ -1,25 +1,19 @@
-import React from 'react';
-import { SparklesIcon } from '../constants';
-import { TTSVoice as Voice } from '../services/tts';
-import { useTTS } from '../contexts/TTSContext';
+import React from "react";
+import { SparklesIcon } from "../constants";
+import { TTSVoice as Voice } from "../services/tts";
+import { useTTS } from "../contexts/TTSContext";
 
 interface VoiceSelectorProps {
   isExpanded: boolean;
   currentText?: string; // Add this prop to receive the current text
 }
 
-const VoiceSelector: React.FC<VoiceSelectorProps> = ({ isExpanded, currentText = '' }) => {
-  const { selectedVoice, setSelectedVoice, autoSelectVoice } = useTTS();
+const VoiceSelector: React.FC<VoiceSelectorProps> = ({
+  isExpanded,
+  currentText = "",
+}) => {
+  const { selectedVoice, setSelectedVoice, autoSelectVoice, isAutoDetect, setIsAutoDetect } = useTTS();
   const [showVoiceSelector, setShowVoiceSelector] = React.useState(false);
-  const [isAutoDetect, setIsAutoDetect] = React.useState(false); // Changed default to false
-
-  // Auto-detect language when text changes and auto-detect is enabled
-  // Auto-detect language when text changes and auto-detect is enabled
-  React.useEffect(() => {
-    if (isAutoDetect && currentText) {
-      autoSelectVoice(currentText);
-    }
-  }, [currentText, isAutoDetect, autoSelectVoice]); // Added autoSelectVoice to dependency array
 
   return (
     <div className="">
@@ -38,13 +32,25 @@ const VoiceSelector: React.FC<VoiceSelectorProps> = ({ isExpanded, currentText =
                 <input
                   type="checkbox"
                   checked={isAutoDetect}
-                  onChange={(e) => setIsAutoDetect(e.target.checked)}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setIsAutoDetect(checked);
+                    // Only call autoSelectVoice when enabling auto-detect
+                    if (checked && currentText) {
+                      autoSelectVoice(currentText);
+                    }
+                  }}
                   className="rounded"
                 />
                 <label>Auto-detect language</label>
               </div>
+              {isAutoDetect && (
+                <div className="text-neutral-400 text-xs">
+                  Auto-detected voice: {selectedVoice}
+                </div>
+              )}
               {!isAutoDetect && (
-                <select 
+                <select
                   value={selectedVoice}
                   onChange={(e) => {
                     const newVoice = e.target.value as Voice;
