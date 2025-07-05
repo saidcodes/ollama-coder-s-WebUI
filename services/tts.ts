@@ -37,7 +37,7 @@ export class TTSService {
     if (!this.client) {
       try {
         this.client = await Client.connect("http://localhost:7860");
-      } catch (e) {
+      } catch {
         this.client = null;
       }
     }
@@ -47,13 +47,10 @@ export class TTSService {
   // Fallback to browser TTS
   private static browserSpeak(text: string, rate: number = 1, voiceName?: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (!("speechSynthesis" in window)) {
-        return reject(new Error("Browser TTS not supported"));
-      }
+      if (!("speechSynthesis" in window)) return reject(new Error("Browser TTS not supported"));
       const utter = new SpeechSynthesisUtterance(text);
       utter.rate = rate;
 
-      // Select a voice if voiceName is provided
       if (voiceName) {
         const voices = window.speechSynthesis.getVoices();
         const selected = voices.find(v => v.name === voiceName);
@@ -78,8 +75,9 @@ export class TTSService {
           [text.trim(), voice, speed],
           { api_name: "/generate_speech" }
         );
-        if (!result?.data?.[1]?.url) throw new Error("Invalid audio response");
-        const audio = new Audio(result.data[1].url);
+        const url = result?.data?.[1]?.url;
+        if (!url) throw new Error("Invalid audio response");
+        const audio = new Audio(url);
         return new Promise<void>((resolve, reject) => {
           audio.onloadeddata = () => {
             audio.play().then(() => {
@@ -87,12 +85,9 @@ export class TTSService {
             }).catch(reject);
           };
           audio.onerror = () => reject(new Error("Audio playback failed"));
-          // Try to play immediately in case the audio is already buffered
           audio.play().then(() => {
             audio.onended = () => resolve();
-          }).catch(() => {
-            // If play fails (e.g., not enough data), wait for onloadeddata
-          });
+          }).catch(() => { /* Wait for onloadeddata */ });
         });
       } catch (error) {
         console.warn("Remote TTS failed, falling back to browser TTS:", error);

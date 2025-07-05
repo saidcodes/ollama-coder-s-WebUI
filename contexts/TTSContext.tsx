@@ -5,12 +5,15 @@ interface TTSContextType {
   selectedVoice: TTSVoice;
   setSelectedVoice: (voice: TTSVoice) => void;
   autoSelectVoice: (text: string) => void;
+  isAutoDetect: boolean;
+  setIsAutoDetect: (val: boolean) => void;
 }
 
 const TTSContext = createContext<TTSContextType | null>(null);
 
 export const TTSProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [selectedVoice, setSelectedVoice] = useState<TTSVoice>(TTSVoice.BELLA);
+  const [isAutoDetect, setIsAutoDetect] = useState(false);
 
   const handleVoiceChange = (voice: string) => {
     // Ensure the voice is a valid TTSVoice enum value
@@ -23,16 +26,32 @@ export const TTSProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const autoSelectVoice = (text: string) => {
+    // Simple language detection and voice selection
+    let detectedVoice = TTSVoice.BELLA; // Default to English female
+
+    if (/[\u3040-\u30ff\u31f0-\u31ff\u3400-\u4dbf\u4e00-\u9faf]/.test(text)) {
+      // Japanese characters
+      detectedVoice = TTSVoice.ALPHA; // Pick a Japanese voice
+    } else if (/[а-яА-ЯЁё]/.test(text)) {
+      // Cyrillic (Russian)
+      detectedVoice = TTSVoice.MICHAEL; // Pick a male English voice as fallback (no Russian in your enum)
+    } else if (/[a-zA-Z]/.test(text)) {
+      // Latin (English)
+      detectedVoice = TTSVoice.BELLA;
+    }
+    // You can add more rules for other languages/voices
+
+    setSelectedVoice(detectedVoice);
+  };
+
   return (
     <TTSContext.Provider value={{
       selectedVoice,
       setSelectedVoice: handleVoiceChange,
-      autoSelectVoice: (text: string) => {
-        // TODO: Implement language detection and voice selection logic here
-        console.log('Auto-selecting voice for text:', text);
-        // For now, just set a default voice or keep the current one
-        // setSelectedVoice(TTSVoice.BELLA);
-      }
+      autoSelectVoice,
+      isAutoDetect,
+      setIsAutoDetect,
     }}>
       {children}
     </TTSContext.Provider>
