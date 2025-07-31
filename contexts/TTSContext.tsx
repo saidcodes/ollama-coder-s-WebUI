@@ -39,8 +39,21 @@ export const TTSProvider: React.FC<{ children: React.ReactNode }> = ({
       // Cyrillic (Russian)
       detectedVoice = TTSVoice.MICHAEL; // Pick a male English voice as fallback (no Russian in your enum)
     } else if (/[a-zA-Z]/.test(text)) {
-      // Latin (English)
+      // English characters (English)
       detectedVoice = TTSVoice.BELLA;
+    } else if (
+      // Spanish characters
+      /[a-zA-Z\u00E1\u00E9\u00ED\u00F1\u00F3\u00C1\u00C9\u00CD\u00D1\u00D3]/.test(
+        text
+      )
+    ) {
+      detectedVoice = TTSVoice.DORA;
+    } else if (/[\u4e00-\u9fff]/.test(text)) {
+      // Chinese characters
+      detectedVoice = TTSVoice.XIAOBEI; // Default to Japanese ALPHA
+    } else if (/[\u00c0-\u017f]/.test(text)) {
+      // French, Italian, Portuguese characters
+      detectedVoice = TTSVoice.BELLA; // Default to English BELLA
     }
     // You can add more rules for other languages/voices
 

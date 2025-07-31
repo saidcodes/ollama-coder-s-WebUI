@@ -10,6 +10,7 @@ A simple interface to run and interact with AI models locally using Ollama.
 ## Getting Started
 
 1. **Install dependencies:**
+
    ```
    npm install
    ```
@@ -17,6 +18,7 @@ A simple interface to run and interact with AI models locally using Ollama.
 2. **Ensure Ollama is running** and you have downloaded at least one model.
 
 3. **Start the development server:**
+
    ```
    npm run dev
    ```

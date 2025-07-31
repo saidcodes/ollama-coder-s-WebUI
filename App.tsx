@@ -1,11 +1,14 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import Sidebar from './components/Sidebar';
 import ChatWindow from './components/ChatWindow';
+import SettingsIcon from './components/SettingsIcon';
+import SettingsModal from './components/SettingsModal';
 
 import { OllamaContext } from './contexts/OllamaContext';
 import {  ExclamationTriangleIcon } from './constants';
 import { TTSProvider } from './contexts/TTSContext';
 const App: React.FC = () => {
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const ollamaContext = useContext(OllamaContext);
 
   if (!ollamaContext) {
@@ -27,7 +30,9 @@ const App: React.FC = () => {
       <Sidebar  />
        <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-    
+        <header className="p-4 flex justify-end">
+          <SettingsIcon onClick={() => setIsSettingsModalOpen(true)} />
+        </header>
         
         {/* Main Content Area */}
         <main className="flex-1 flex flex-col p-2 md:p-6 overflow-y-auto bg-neutral-800 space-y-4">
@@ -62,6 +67,10 @@ const App: React.FC = () => {
            )}
         </main>
       </div>
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+      />
     </div>
   </TTSProvider>);
 };

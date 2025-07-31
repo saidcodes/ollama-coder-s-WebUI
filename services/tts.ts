@@ -26,7 +26,12 @@ export enum TTSVoice {
   GONGITSUNE = "jf_gongitsune",
   NEZUMI = "jf_nezumi",
   TEBUKURO = "jf_tebukuro",
-  KUMO = "jm_kumo"
+  KUMO = "jm_kumo",
+  //spanish female voices
+  DORA = "ef_dora" ,
+
+  //chinese female voices
+  XIAOBEI = "zf_xiaobei"
 }
 
 

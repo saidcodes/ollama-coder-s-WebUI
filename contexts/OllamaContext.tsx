@@ -1,10 +1,26 @@
-import React, { createContext, useState, useEffect, useCallback, ReactNode } from 'react';
-import { OllamaModel, Message, OllamaContextType, OllamaChatRequestBody } from '../types';
-import { OLLAMA_API_BASE_URL } from '../constants';
-import { fetchModels as apiFetchModels, streamChat as apiStreamChat } from '../services/ollamaService';
-import db, { Chat } from '../lib/db';
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+} from "react";
+import {
+  OllamaModel,
+  Message,
+  OllamaContextType,
+  OllamaChatRequestBody,
+} from "../types";
+import { OLLAMA_API_BASE_URL } from "../constants";
+import {
+  fetchModels as apiFetchModels,
+  streamChat as apiStreamChat,
+} from "../services/ollamaService";
+import db, { Chat } from "../lib/db";
 
-export const OllamaContext = createContext<OllamaContextType | undefined>(undefined);
+export const OllamaContext = createContext<OllamaContextType | undefined>(
+  undefined
+);
 
 interface OllamaProviderProps {
   children: ReactNode;
@@ -13,16 +29,22 @@ interface OllamaProviderProps {
 export const OllamaProvider: React.FC<OllamaProviderProps> = ({ children }) => {
   const [models, setModels] = useState<OllamaModel[] | null>([]);
   const [selectedModel, setSelectedModel] = useState<OllamaModel | null>(null);
-  const [systemPrompt, setSystemPrompt] = useState<string>("You are a helpful AI coding assistant. Provide clear, concise, and correct code examples and explanations. Format code blocks appropriately for easy readability.");
+  const [systemPrompt, setSystemPrompt] = useState<string>(
+    "You are a helpful AI coding assistant. Provide clear, concise, and correct code examples and explanations. Format code blocks appropriately for easy readability."
+  );
   const [chatHistory, setChatHistory] = useState<Message[]>([]);
-  const [currentAssistantMessage, setCurrentAssistantMessage] = useState<string | null>(null);
+  const [currentAssistantMessage, setCurrentAssistantMessage] = useState<
+    string | null
+  >(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [ollamaApiUrl, setOllamaApiUrlState] = useState<string>(OLLAMA_API_BASE_URL);
+  const [ollamaApiUrl, setOllamaApiUrlState] =
+    useState<string>(OLLAMA_API_BASE_URL);
   const [isOllamaAvailable, setIsOllamaAvailable] = useState<boolean>(true); // Assume available initially
   const [chats, setChats] = useState<Chat[]>([]);
   const [currentChatId, setCurrentChatId] = useState<number | undefined>();
-  const [abortController, setAbortController] = useState<AbortController | null>(null);
+  const [abortController, setAbortController] =
+    useState<AbortController | null>(null);
 
   const stopGeneration = useCallback(() => {
     if (abortController) {
@@ -33,11 +55,11 @@ export const OllamaProvider: React.FC<OllamaProviderProps> = ({ children }) => {
       if (currentAssistantMessage) {
         const assistantMessage: Message = {
           id: Date.now().toString(),
-          role: 'assistant',
+          role: "assistant",
           content: currentAssistantMessage,
           timestamp: new Date(),
         };
-        setChatHistory(prev => [...prev, assistantMessage]);
+        setChatHistory((prev) => [...prev, assistantMessage]);
         setCurrentAssistantMessage(null);
       }
     }
@@ -48,13 +70,21 @@ export const OllamaProvider: React.FC<OllamaProviderProps> = ({ children }) => {
     setError(null);
     setIsOllamaAvailable(true); // Assume available before fetching
     try {
-      const fetchedModels = await apiFetchModels(ollamaApiUrl);
+      const fetchedModels = await apiFetchModels(`${ollamaApiUrl}`);
       setModels(fetchedModels);
+      console.log("Fetched models:", fetchedModels);
       if (fetchedModels.length > 0) {
         if (!selectedModel) {
-          setSelectedModel(fetchedModels.find(m => m.name === fetchedModels.sort((a, b) => a.size - b.size)[0].name) || fetchedModels[0]);
+          setSelectedModel(
+            fetchedModels.find(
+              (m) =>
+                m.name === fetchedModels.sort((a, b) => a.size - b.size)[0].name
+            ) || fetchedModels[0]
+          );
         } else {
-          const currentModel = fetchedModels.find(m => m.name === selectedModel.name);
+          const currentModel = fetchedModels.find(
+            (m) => m.name === selectedModel.name
+          );
           setSelectedModel(currentModel || fetchedModels[0]);
         }
       } else {
@@ -62,8 +92,13 @@ export const OllamaProvider: React.FC<OllamaProviderProps> = ({ children }) => {
       }
     } catch (e) {
       // Refined console logging
-      if (e instanceof TypeError && e.message.toLowerCase().includes('failed to fetch')) {
-        console.error(`Network error while trying to fetch models from ${ollamaApiUrl}: ${e.message}. This is often a CORS issue or Ollama server problem. Check the UI for detailed troubleshooting steps.`);
+      if (
+        e instanceof TypeError &&
+        e.message.toLowerCase().includes("failed to fetch")
+      ) {
+        console.error(
+          `Network error while trying to fetch models from ${ollamaApiUrl}: ${e.message}. This is often a CORS issue or Ollama server problem. Check the UI for detailed troubleshooting steps.`
+        );
         setIsOllamaAvailable(false); // Set to false if fetch fails
       } else {
         console.error(`Error fetching models from ${ollamaApiUrl}:`, e);
@@ -71,7 +106,10 @@ export const OllamaProvider: React.FC<OllamaProviderProps> = ({ children }) => {
       }
 
       let specificErrorDetails = "";
-      if (e instanceof TypeError && e.message.toLowerCase().includes('failed to fetch')) {
+      if (
+        e instanceof TypeError &&
+        e.message.toLowerCase().includes("failed to fetch")
+      ) {
         specificErrorDetails = `A network connection to Ollama failed: "${e.message}".
 
 This usually means:
@@ -87,7 +125,15 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
       } else if (e instanceof Error) {
         specificErrorDetails = `Failed to fetch models. Error: ${e.message}`;
       } else {
-        specificErrorDetails = `An unknown error occurred while fetching models. Details: ${String(e)}`;
+        specificErrorDetails = `An unknown error occurred while fetching models. Details: ${String(
+          e
+        )}`;
+      }
+      if (
+        e instanceof Error &&
+        e.message.includes("The server returned an HTML page")
+      ) {
+        specificErrorDetails = e.message;
       }
       setError(specificErrorDetails);
       setModels(null); // Indicate an error state for models
@@ -103,18 +149,17 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
   }, [ollamaApiUrl]);
 
   const setSelectedModelByName = (name: string) => {
-    if(models){
-      const model = models.find(m => m.name === name) || null;
+    if (models) {
+      const model = models.find((m) => m.name === name) || null;
       setSelectedModel(model);
     }
   };
 
- 
   const clearChat = () => {
     setChatHistory([]);
     setCurrentAssistantMessage(null);
     setCurrentChatId(undefined);
-    setError(null); 
+    setError(null);
   };
 
   const sendMessage = async (userPrompt: string) => {
@@ -136,21 +181,26 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
 
     const newUserMessage: Message = {
       id: Date.now().toString(),
-      role: 'user',
+      role: "user",
       content: userPrompt,
       timestamp: new Date(),
     };
-    setChatHistory(prev => [...prev, newUserMessage]);
-    
-    const messagesToApi: { role: 'system' | 'user' | 'assistant'; content: string }[] = [];
-    if (systemPrompt.trim()) {
-      messagesToApi.push({ role: 'system', content: systemPrompt });
-    }
-    
-    const historyForApi = chatHistory.map(msg => ({ role: msg.role, content: msg.content }));
-    messagesToApi.push(...historyForApi);
-    messagesToApi.push({ role: 'user', content: userPrompt });
+    setChatHistory((prev) => [...prev, newUserMessage]);
 
+    const messagesToApi: {
+      role: "system" | "user" | "assistant";
+      content: string;
+    }[] = [];
+    if (systemPrompt.trim()) {
+      messagesToApi.push({ role: "system", content: systemPrompt });
+    }
+
+    const historyForApi = chatHistory.map((msg) => ({
+      role: msg.role,
+      content: msg.content,
+    }));
+    messagesToApi.push(...historyForApi);
+    messagesToApi.push({ role: "user", content: userPrompt });
 
     const requestBody: OllamaChatRequestBody = {
       model: selectedModel.name,
@@ -167,28 +217,29 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
         }
         if (chunk.message && chunk.message.content) {
           fullResponse += chunk.message.content;
-          setCurrentAssistantMessage(prev => (prev || "") + chunk.message.content);
+          setCurrentAssistantMessage(
+            (prev) => (prev || "") + chunk.message.content
+          );
         }
         if (chunk.done) {
-          if ((chunk as any).error) { 
-             throw new Error((chunk as any).error);
+          if ((chunk as any).error) {
+            throw new Error((chunk as any).error);
           }
           break;
         }
       }
-      
+
       if (!signal.aborted) {
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
-          role: 'assistant',
+          role: "assistant",
           content: fullResponse,
           timestamp: new Date(),
         };
-        setChatHistory(prev => [...prev, assistantMessage]);
+        setChatHistory((prev) => [...prev, assistantMessage]);
       }
-
     } catch (e) {
-      if ((e as any)?.name === 'AbortError') {
+      if ((e as any)?.name === "AbortError") {
         // Ignore abort errors
         return;
       }
@@ -197,43 +248,43 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
       setError(`Error communicating with Ollama: ${errorMessage}`);
       const errorAssistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        role: 'assistant',
+        role: "assistant",
         content: `Sorry, I encountered an error during the chat: ${errorMessage}`,
         timestamp: new Date(),
       };
-      setChatHistory(prev => [...prev, errorAssistantMessage]);
+      setChatHistory((prev) => [...prev, errorAssistantMessage]);
     } finally {
       setAbortController(null);
       setIsLoading(false);
       setCurrentAssistantMessage(null);
     }
   };
-  
+
   const setOllamaApiUrl = (url: string) => {
     setOllamaApiUrlState(url);
   };
 
-
-
-//this 
+  //this
   const saveChat = async () => {
     if (!selectedModel || chatHistory.length === 0) return;
 
     const chat: Chat = {
       id: currentChatId,
-      title: chatHistory[0].content.slice(0, 30) + '...',
-      messages: chatHistory
-        .filter((msg): msg is Message & { role: 'user' | 'assistant' } => msg.role === 'user' || msg.role === 'assistant'),
+      title: chatHistory[0].content.slice(0, 30) + "...",
+      messages: chatHistory.filter(
+        (msg): msg is Message & { role: "user" | "assistant" } =>
+          msg.role === "user" || msg.role === "assistant"
+      ),
       modelId: selectedModel.name,
       createdAt: (() => {
         if (currentChatId) {
           // Try to find the existing chat's createdAt date
-          const existingChat = chats.find(c => c.id === currentChatId);
+          const existingChat = chats.find((c) => c.id === currentChatId);
           return existingChat ? existingChat.createdAt : new Date();
         }
         return new Date();
       })(),
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
     };
 
     try {
@@ -243,8 +294,8 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
       const loadedChats = await db.getAllChats();
       setChats(loadedChats);
     } catch (error) {
-      console.error('Failed to save chat:', error);
-      setError('Failed to save chat to database');
+      console.error("Failed to save chat:", error);
+      setError("Failed to save chat to database");
     }
   };
 
@@ -254,8 +305,8 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
       const loadedChats = await db.getAllChats();
       setChats(loadedChats);
     } catch (error) {
-      console.error('Failed to load chats:', error);
-      setError('Failed to load chats from database');
+      console.error("Failed to load chats:", error);
+      setError("Failed to load chats from database");
     }
   };
 
@@ -270,8 +321,8 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
         }
       }
     } catch (error) {
-      console.error('Failed to load chat:', error);
-      setError('Failed to load chat from database');
+      console.error("Failed to load chat:", error);
+      setError("Failed to load chat from database");
     }
   };
 
@@ -302,36 +353,37 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
       // Refresh the chat list
       loadChats();
     } catch (error) {
-      console.error('Failed to delete chat:', error);
-      setError('Failed to delete chat from database');
+      console.error("Failed to delete chat:", error);
+      setError("Failed to delete chat from database");
     }
   };
 
   // Return value includes stopGeneration
   return (
-    <OllamaContext.Provider value={{
-      models,
-      selectedModel,
-      setSelectedModelByName,
-      systemPrompt,
-      setSystemPrompt,
-      chatHistory,
-      currentAssistantMessage,
-      sendMessage,
-      isLoading,
-      error,
-      clearChat,
-      fetchModels,
-      ollamaApiUrl,
-      setOllamaApiUrl,
-      chats,
-      loadChat,
-      loadChats,
-      deleteChat,
-      currentChatId,
-      stopGeneration,
-      
-    }}>
+    <OllamaContext.Provider
+      value={{
+        models,
+        selectedModel,
+        setSelectedModelByName,
+        systemPrompt,
+        setSystemPrompt,
+        chatHistory,
+        currentAssistantMessage,
+        sendMessage,
+        isLoading,
+        error,
+        clearChat,
+        fetchModels,
+        ollamaApiUrl,
+        setOllamaApiUrl,
+        chats,
+        loadChat,
+        loadChats,
+        deleteChat,
+        currentChatId,
+        stopGeneration,
+      }}
+    >
       {children}
     </OllamaContext.Provider>
   );

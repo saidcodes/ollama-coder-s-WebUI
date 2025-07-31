@@ -2,7 +2,14 @@
 import { OllamaModel, OllamaTagResponse, OllamaChatRequestBody, OllamaChatStreamChunk } from '../types';
 
 export async function fetchModels(apiUrl: string): Promise<OllamaModel[]> {
-  const response = await fetch(`${apiUrl}/api/tags`);
+  const response = await fetch(`${apiUrl}/api/tags`, {
+    method: 'GET',
+    headers: new Headers({
+   
+      "Content-Type": "application/json",
+    }),
+    
+  });
   if (!response.ok) {
     const errorData = await response.text();
     throw new Error(`Failed to fetch models: ${response.status} ${response.statusText}. ${errorData}`);
@@ -17,6 +24,7 @@ export async function* streamChat(apiUrl: string, body: OllamaChatRequestBody): 
     headers: {
       'Content-Type': 'application/json',
     },
+   
     body: JSON.stringify(body),
   });
 
