@@ -47,6 +47,7 @@ const VoiceSelector: React.FC<VoiceSelectorProps> = ({
                     }
                   }}
                   className="rounded"
+                  
                 />
                 <label>Auto-detect language</label>
               </div>

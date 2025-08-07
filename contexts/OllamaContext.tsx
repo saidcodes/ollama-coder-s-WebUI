@@ -8,9 +8,10 @@ import React, {
 import {
   OllamaModel,
   Message,
-  OllamaContextType,
   OllamaChatRequestBody,
+  OllamaContextType,
 } from "../types";
+
 import { OLLAMA_API_BASE_URL } from "../constants";
 import {
   fetchModels as apiFetchModels,
@@ -45,6 +46,12 @@ export const OllamaProvider: React.FC<OllamaProviderProps> = ({ children }) => {
   const [currentChatId, setCurrentChatId] = useState<number | undefined>();
   const [abortController, setAbortController] =
     useState<AbortController | null>(null);
+  const [isStreamingSoundEnabled, setIsStreamingSoundEnabledState] =
+    useState<boolean>(true);
+
+  const setIsStreamingSoundEnabled = (enabled: boolean) => {
+    setIsStreamingSoundEnabledState(enabled);
+  };
 
   const stopGeneration = useCallback(() => {
     if (abortController) {
@@ -382,6 +389,8 @@ Please verify your Ollama setup, network configuration, and CORS settings.`;
         deleteChat,
         currentChatId,
         stopGeneration,
+        isStreamingSoundEnabled,
+        setIsStreamingSoundEnabled,
       }}
     >
       {children}

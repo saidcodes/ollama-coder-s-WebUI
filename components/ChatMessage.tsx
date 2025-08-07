@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Message } from "../types";
@@ -14,6 +14,8 @@ import {
 import { TTSService, TTSVoice } from "../services/tts";
 import { useTTS } from "@/contexts/TTSContext";
 import useCopyToClipboard from "../hooks/useCopyToClipboard"; // Import the hook
+import { Howl} from 'howler';
+import { OllamaContext } from "../contexts/OllamaContext";
 
 interface ChatMessageProps {
   message: Message;
@@ -33,6 +35,24 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
   const { role, content } = message;
   const isUser = role === "user";
   const [isPlaying, setIsplaying] = React.useState(false);
+  const ollamaContext = useContext(OllamaContext);
+  const { isStreamingSoundEnabled } = ollamaContext || {};
+  const sound = React.useRef<Howl | null>(null);
+
+  React.useEffect(() => {
+    sound.current = new Howl({
+      src: ['public/ting-(2).mp3'],
+      volume: 0.5,
+    });
+
+    if (isStreaming && isStreamingSoundEnabled) {
+      sound.current?.play();
+    }
+
+    return () => {
+      sound.current?.unload();
+    };
+  }, []);
   const { selectedVoice, autoSelectVoice, isAutoDetect } = useTTS();
   const [isCopied, copyToClipboard] = useCopyToClipboard(); // Initialize copy hook
 
@@ -40,7 +60,14 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
     // Add copy handler
     await copyToClipboard(content);
   };
-
+  React.useEffect(() => {
+    if (isStreaming && isStreamingSoundEnabled) {
+      const intervalId = setInterval(() => {
+        sound.current?.play();
+      }, 500); // Play sound every 500ms
+      return () => clearInterval(intervalId);
+    }
+  }, [content, isStreaming]);
   const Icon = isUser ? UserCircleIcon : SparklesIcon;
   const bgColor = isUser ? "bg-neutral-700" : "bg-transparent"; //no bg for the ai
   const textColor = "text-neutral-100"; // Consistent text color
@@ -49,6 +76,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
   const handleSpeak = async () => {
     try {
       if (!isStreaming && !isUser) {
+        if (isPlaying) {
+          TTSService.stopSpeak();
+          setIsplaying(false);
+          return;
+        }
         setIsplaying(true);
 
         let voiceToUse = selectedVoice;
@@ -72,8 +104,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
 
         await TTSService.speak(content, voiceToUse);
       }
-      setIsplaying(false);
     } catch (error) {
+      TTSService.stopSpeak();
       setIsplaying(false);
       alert(
         "Text-to-speech service error. Please make sure the API is running."
@@ -139,6 +171,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
                     // For code blocks without explicit language
                     return (
                       <CodeBlock
+                        
                         language="text" // default or try to guess
                         value={value}
                         {...rest} // Pass remaining props
@@ -201,7 +234,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
                 {isPlaying ? (
                   <SpeakerWaveIcon className="w-5 h-5 text-green-500 animate-pulse" />
                 ) : (
-                  <SpeakerXMarkIcon className="w-5 h-5 text-neutral-400" />
+                  isPlaying ? (
+                    <SpeakerWaveIcon className="w-5 h-5 text-green-500 animate-pulse" />
+                  ) : (
+                    <SpeakerXMarkIcon className="w-5 h-5 text-neutral-400" />
+                  )
                 )}
               </button>
             )}
@@ -213,5 +250,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, isStreaming }) => {
     </div>
   );
 };
+
 
 export default ChatMessage;

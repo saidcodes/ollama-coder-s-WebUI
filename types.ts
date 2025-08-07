@@ -69,8 +69,9 @@ export interface OllamaContextType {
   loadChats: () => Promise<void>;
   deleteChat: (id: number) => Promise<void>;
   currentChatId?: number;
+  isStreamingSoundEnabled: boolean;
+  setIsStreamingSoundEnabled: (enabled: boolean) => void;
 }
-
 export interface GroundingChunk {
   web?: {
     uri: string;

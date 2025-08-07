@@ -37,6 +37,9 @@ export enum TTSVoice {
 
 export class TTSService {
   private static client: any = null;
+  private static currentAudio: HTMLAudioElement | null = null;
+  private static currentUtterance: SpeechSynthesisUtterance | null = null;
+  private static speechSynthesis: SpeechSynthesis | null = null;
 
   private static async getClient() {
     if (!this.client) {
@@ -65,8 +68,10 @@ export class TTSService {
       utter.onend = () => resolve();
       utter.onerror = (e) => reject(e.error || new Error("Browser TTS failed"));
       window.speechSynthesis.speak(utter);
+      TTSService.currentUtterance = utter;
+      TTSService.speechSynthesis = window.speechSynthesis;
     });
-  }
+}
 
   static async speak(text: string, voice: TTSVoice = TTSVoice.BELLA, speed: number = 1) {
     if (!text || typeof text !== "string") throw new Error("Invalid text input");
@@ -90,6 +95,7 @@ export class TTSService {
             }).catch(reject);
           };
           audio.onerror = () => reject(new Error("Audio playback failed"));
+          TTSService.currentAudio = audio;
           audio.play().then(() => {
             audio.onended = () => resolve();
           }).catch(() => { /* Wait for onloadeddata */ });
@@ -120,6 +126,20 @@ export class TTSService {
       }
     } else {
       return this.browserSpeak("Test message", 1.0);
+    }
+  }
+
+  static stopSpeak() {
+    if (TTSService.currentAudio) {
+      TTSService.currentAudio.pause();
+      TTSService.currentAudio.removeAttribute('src'); // empty source
+      TTSService.currentAudio.load();
+      TTSService.currentAudio = null;
+    }
+    if (TTSService.currentUtterance && TTSService.speechSynthesis) {
+      TTSService.speechSynthesis.cancel();
+      TTSService.currentUtterance = null;
+      TTSService.speechSynthesis = null;
     }
   }
 }
